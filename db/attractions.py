@@ -26,3 +26,18 @@ def get_like(name, case_sensitive=False):
         ]
     })
     return FeatureCollection(list(attractions))
+
+@st.cache_data
+def get_near(coords, max_distance=1000):
+    attractions = db.attractions.find({
+        "geometry": {
+            "$near": {
+                "$geometry": {
+                    "type": "Point",
+                    "coordinates": coords
+                },
+                "$maxDistance": max_distance
+            }
+        }
+    })
+    return FeatureCollection(list(attractions))
