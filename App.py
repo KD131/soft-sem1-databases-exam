@@ -11,8 +11,8 @@ all = FeatureCollection(subway_stops['features'] + attractions['features'])
 
 coords = [stop["geometry"]["coordinates"] for stop in subway_stops['features']]
 
-subway = st.selectbox("Select a subway stop", coords)
-nearby_attractions = db.attractions.get_near(subway)
+subway = st.selectbox("Select a subway stop", subway_stops['features'], format_func=lambda stop: stop['properties']['name'])
+nearby_attractions = db.attractions.get_near(subway['geometry']['coordinates'])
 st.write(f"{len(nearby_attractions['features'])} attractions found near this stop.")
 
 def get_name(feature):
