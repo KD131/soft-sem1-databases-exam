@@ -2,6 +2,7 @@
 For streamlit install these packages:
 ```shell
 pip install streamlit
+pip install streamlit-folium
 pip install "altair<5"
 ```
 
