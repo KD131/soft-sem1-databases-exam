@@ -31,7 +31,7 @@ with col1:
     # unfortunately it always selects something anyway.
     if subway:
         nearby_attractions = db.attractions.get_near(subway['geometry']['coordinates'])
-        st.write(f"{len(nearby_attractions['features'])} attractions found near this stop.")
+        st.caption(f"{len(nearby_attractions['features'])} attractions found near this stop.")
         with st.expander("Show attractions"):
             st.write([get_name(attraction) for attraction in nearby_attractions['features']])
 
@@ -40,7 +40,7 @@ with col1:
     if name:
         searched = db.attractions.get_like(name)
         remove_ids(searched['features'])
-        st.write(f"{len(searched['features'])} results found.")
+        st.caption(f"{len(searched['features'])} results found.")
         with st.expander("Show attractions"):
             st.write([get_name(attraction) for attraction in searched['features']])
 
