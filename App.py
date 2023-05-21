@@ -64,7 +64,7 @@ with col2:
         'fill_opacity': 0.8
     }
     
-    if name and searched:
+    if name and searched['features']:
         folium.GeoJson(searched,
                     style_function=lambda x: style,
                     name="Search Results",
