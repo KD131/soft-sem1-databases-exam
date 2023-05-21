@@ -9,6 +9,7 @@ def get_all():
     attractions = db.attractions.find({}, { "_id": 0 } )
     return FeatureCollection(list(attractions))
 
+# It would solve some problems if we renamed the fields to 'name' consistently.
 @st.cache_data
 def get_like(name, case_sensitive=False):
     options = 'i' if not case_sensitive else ''
