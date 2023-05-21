@@ -6,7 +6,7 @@ from db.connection import db
 
 @st.cache_data
 def get_all():
-    attractions = db.attractions.find()
+    attractions = db.attractions.find({}, { "_id": 0 } )
     return FeatureCollection(list(attractions))
 
 @st.cache_data
@@ -24,7 +24,7 @@ def get_like(name, case_sensitive=False):
             { "properties.area_name": query },
             { "properties.lpc_name": query }
         ]
-    })
+    }, { "_id": 0 } )
     return FeatureCollection(list(attractions))
 
 @st.cache_data
@@ -39,5 +39,5 @@ def get_near(coords, max_distance=1000):
                 "$maxDistance": max_distance
             }
         }
-    })
+    }, { "_id": 0 })
     return FeatureCollection(list(attractions))

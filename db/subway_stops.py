@@ -6,7 +6,7 @@ from db.connection import db
 
 @st.cache_data
 def get_all():
-    stops = db.transit.find()
+    stops = db.transit.find({}, { "_id": 0 } )
     return FeatureCollection(list(stops))
 
 @st.cache_data
@@ -21,5 +21,5 @@ def get_near(coords, max_distance=1000):
                 "$maxDistance": max_distance
             }
         }
-    })
+    }, { "_id": 0 })
     return FeatureCollection(list(stops))

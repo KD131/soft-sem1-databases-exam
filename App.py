@@ -13,16 +13,11 @@ def get_name(feature):
     properties = feature['properties']
     return properties.get('name') or properties.get('scen_lm_na') or properties.get('area_name') or properties.get('lpc_name')
 
-def remove_ids(features):
-    for feature in features:
-        feature.pop('_id', None)
-
 
 st.title("Welcome to the NYC Transit App")
 st.write("This app shows you NYC subway stops and nearby attractions")
 # get data
 subway_stops = db.subway_stops.get_all()
-remove_ids(subway_stops['features'])
 
 col1, col2 = st.columns(2)
 with col1:
@@ -39,7 +34,6 @@ with col1:
     name = st.text_input("Search for an attraction")
     if name:
         searched = db.attractions.get_like(name)
-        remove_ids(searched['features'])
         st.caption(f"{len(searched['features'])} results found.")
         with st.expander("Show attractions"):
             st.write([get_name(attraction) for attraction in searched['features']])
