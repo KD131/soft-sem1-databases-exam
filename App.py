@@ -109,7 +109,7 @@ with col2:
         near = db.subway_stops.get_near(coords)
         if near['features']:
             closest = near['features'][0]
-            st.write(f"Closest subway stop: **{closest['properties']['name']}**")
+            st.write(f"Closest subway stop: **{closest['properties']['name']}**  \n({round(closest['distance'])} meters away)")
         else:
             st.write("No nearby subway stops.")
     
