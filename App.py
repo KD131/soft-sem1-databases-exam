@@ -1,6 +1,6 @@
 import folium
 import streamlit as st
-from folium.plugins import Draw
+from folium.plugins import Draw, MousePosition
 from geojson import FeatureCollection
 from streamlit_folium import st_folium
 
@@ -103,6 +103,7 @@ with col2:
         'circlemarker': False
         }).add_to(m)
     folium.LayerControl(collapsed=True, hide_single_base=True).add_to(m)
+    MousePosition().add_to(m)
     map_data = st_folium(m, width=1000, height=500, returned_objects=['all_drawings'])
     
     def closest_stop(coords):
