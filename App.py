@@ -89,6 +89,6 @@ with col2:
                    marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
                    ).add_to(m)
     
-    # folium.LayerControl(collapsed=False).add_to(m) # doesn't seem to show up
-    map_data = st_folium(m, width=1200, height=800, returned_objects=[])
+    folium.LayerControl(collapsed=True).add_to(m)
+    map_data = st_folium(m, width=800, height=800, returned_objects=[])
 
