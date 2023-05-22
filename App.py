@@ -105,6 +105,14 @@ with col2:
     folium.LayerControl(collapsed=True, hide_single_base=True).add_to(m)
     map_data = st_folium(m, width=1000, height=500, returned_objects=['all_drawings'])
     
+    def closest_stop(coords):
+        near = db.subway_stops.get_near(coords)
+        if near['features']:
+            closest = near['features'][0]
+            st.write(f"Closest subway stop: **{closest['properties']['name']}**")
+        else:
+            st.write("No nearby subway stops.")
+    
     # start and end markers
     # first two markers but could just as well be the last two
     markers = (map_data['all_drawings'] if map_data['all_drawings'] is not None else [])[:2]
@@ -112,14 +120,18 @@ with col2:
     with col1:
         st.header("Start")
         if len(markers) > 0:
-            st.write(markers[0])
+            coords = markers[0]['geometry']['coordinates']
+            st.write(coords)
+            closest_stop(coords)
         else:
             st.caption("*Put a marker on the map.*")
             
     with col2:
         st.header("End")
         if len(markers) > 1:
-            st.write(markers[1])
+            coords = markers[1]['geometry']['coordinates']
+            st.write(coords)
+            closest_stop(coords)
         else:
             st.caption("*Put a marker on the map.*")
 
