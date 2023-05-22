@@ -1,7 +1,7 @@
 import folium
 import streamlit as st
 from folium.plugins import Draw, MousePosition
-from geojson import FeatureCollection
+from geojson import Feature, FeatureCollection, LineString
 from streamlit_folium import st_folium
 
 import db
@@ -109,8 +109,11 @@ with col2:
     def closest_stop(coords):
         near = db.subway_stops.get_near(coords)
         if near['features']:
-            closest = near['features'][0]
-            st.write(f"Closest subway stop: **{closest['properties']['name']}**  \n({round(closest['distance'])} meters away)")
+            return near['features'][0] 
+    
+    def write_stop_distance(stop):
+        if stop:
+            st.write(f"Closest subway stop: **{stop['properties']['name']}**  \n({round(stop['distance'])} meters away)")
         else:
             st.write("No nearby subway stops.")
     
@@ -122,7 +125,8 @@ with col2:
         st.header("Start")
         if len(markers) > 0:
             coords = markers[0]['geometry']['coordinates']
-            closest_stop(coords)
+            start_stop = closest_stop(coords)
+            write_stop_distance(start_stop)
         else:
             st.caption("*Put a marker on the map.*")
             
@@ -130,9 +134,40 @@ with col2:
         st.header("End")
         if len(markers) > 1:
             coords = markers[1]['geometry']['coordinates']
-            closest_stop(coords)
+            end_stop = closest_stop(coords)
+            write_stop_distance(end_stop)
         else:
             st.caption("*Put a marker on the map.*")
+    
+    # result map
+    if len(markers) > 1:
+        # TODO: unpack coordinates before the LineStrings
+        with st.expander("Show result"):
+            coords = [marker['geometry']['coordinates'] for marker in markers]
+            lons, lats = zip(*coords)
+            m = folium.Map()
+            m.fit_bounds([[min(lats), min(lons)], [max(lats), max(lons)]])
+            folium.GeoJson(FeatureCollection(markers),
+                           marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
+                           ).add_to(m)
+            folium.GeoJson(FeatureCollection([start_stop, end_stop]),
+                           marker=folium.Circle(radius=30, color='purple', fill=True, fill_color='purple', fill_opacity=0.9)
+                           ).add_to(m)
+            # TODO: consider multi-line. I think if you want to style them differently, they must be different features,
+            # TODO: but the line between the stops could be a multi-line.
+            folium.GeoJson(FeatureCollection([
+                Feature(geometry=LineString([start_stop['geometry']['coordinates'], end_stop['geometry']['coordinates']])),
+                Feature(geometry=LineString([start_stop['geometry']['coordinates'], markers[0]['geometry']['coordinates']])),
+                Feature(geometry=LineString([end_stop['geometry']['coordinates'], markers[1]['geometry']['coordinates']]))
+            ]),
+                           style_function=lambda x: {
+                               'color': '#0e1117',
+                               'dashArray': '10'
+                           }
+                           ).add_to(m)
+            st_folium(m, width=1000, height=500, returned_objects=[])
+
+# TODO: refactor
 
 # When the inputs change, the map is redrawn and the markers are removed.
 # We can change this so that it updates the map seemlessly, but we lose a lot of customizability.
