@@ -122,3 +122,7 @@ with col2:
             st.write(markers[1])
         else:
             st.caption("*Put a marker on the map.*")
+
+# When the inputs change, the map is redrawn and the markers are removed.
+# We can change this so that it updates the map seemlessly, but we lose a lot of customizability.
+# Colour-coding and layers would go away.
