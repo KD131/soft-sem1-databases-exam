@@ -9,9 +9,9 @@ def get_all():
     attractions = db.attractions.find({}, { "_id": 0 } )
     return FeatureCollection(list(attractions))
 
-# It would solve some problems if we renamed the fields to 'name' consistently.
+# deprecated
 @st.cache_data
-def get_like(name, case_sensitive=False):
+def _get_like(name, case_sensitive=False):
     options = 'i' if not case_sensitive else ''
     query = {
         "$regex": name,
@@ -26,6 +26,17 @@ def get_like(name, case_sensitive=False):
             { "properties.lpc_name": query }
         ]
     }, { "_id": 0 } )
+    return FeatureCollection(list(attractions))
+
+@st.cache_data
+def get_like(name, case_sensitive=False):
+    options = 'i' if not case_sensitive else ''
+    query = {
+        "$regex": name,
+        "$options": options
+    }
+    
+    attractions = db.attractions.find({"properties.name": query }, { "_id": 0 } )
     return FeatureCollection(list(attractions))
 
 @st.cache_data

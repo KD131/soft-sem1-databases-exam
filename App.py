@@ -7,11 +7,9 @@ import db
 
 st.set_page_config(layout="wide")
 
-NAME_PROPERTIES = ['name', 'scen_lm_na', 'area_name', 'lpc_name']
-
 def get_name(feature):
     properties = feature['properties']
-    return properties.get('name') or properties.get('scen_lm_na') or properties.get('area_name') or properties.get('lpc_name')
+    return properties.get('name')# or properties.get('scen_lm_na') or properties.get('area_name') or properties.get('lpc_name')
 
 
 st.title("Welcome to the NYC Transit App")
@@ -64,17 +62,9 @@ with col2:
             folium.GeoJson(nearby_attractions,
                     style_function=lambda x: nearby_style,
                     name="Nearby Attractions",
-                    # tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
+                    tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
                     marker=folium.Circle(radius=30, **nearby_style)
                     ).add_to(m)
-    
-    # subway stops layer
-    folium.GeoJson(subway_stops,
-                   name="Subway Stops",
-                   tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
-                   popup=folium.GeoJsonPopup(fields=["name", "line", "notes"], aliases=["Stop Name", "Line", "Notes"]),
-                   marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
-                   ).add_to(m)
     
     # searched attractions layer
     if name and searched['features']:
@@ -90,6 +80,14 @@ with col2:
                     tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
                     marker=folium.Circle(radius=30, **searched_style)
                     ).add_to(m)
+    
+    # subway stops layer
+    folium.GeoJson(subway_stops,
+                   name="Subway Stops",
+                   tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
+                   popup=folium.GeoJsonPopup(fields=["name", "line", "notes"], aliases=["Stop Name", "Line", "Notes"]),
+                   marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
+                   ).add_to(m)
     
     # folium.LayerControl(collapsed=False).add_to(m) # doesn't seem to show up
     map_data = st_folium(m, width=1200, height=800, returned_objects=[])
