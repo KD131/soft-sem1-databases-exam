@@ -122,7 +122,6 @@ with col2:
         st.header("Start")
         if len(markers) > 0:
             coords = markers[0]['geometry']['coordinates']
-            st.write(coords)
             closest_stop(coords)
         else:
             st.caption("*Put a marker on the map.*")
@@ -131,7 +130,6 @@ with col2:
         st.header("End")
         if len(markers) > 1:
             coords = markers[1]['geometry']['coordinates']
-            st.write(coords)
             closest_stop(coords)
         else:
             st.caption("*Put a marker on the map.*")
