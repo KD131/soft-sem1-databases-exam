@@ -25,7 +25,8 @@ with col1:
     # unfortunately it always selects something anyway.
     if subway:
         nearby_attractions = db.attractions.get_near(subway['geometry']['coordinates'])
-        st.caption(f"{len(nearby_attractions['features'])} attractions found near this stop.")
+        n = len(nearby_attractions['features'])
+        st.caption(f"{n} attraction{'s'[:n^1]} found near this stop.")
         with st.expander("Show attractions"):
             st.write([get_name(attraction) for attraction in nearby_attractions['features']])
 
@@ -33,7 +34,8 @@ with col1:
     name = st.text_input("Search for an attraction")
     if name:
         searched = db.attractions.get_like(name)
-        st.caption(f"{len(searched['features'])} results found.")
+        n = len(searched['features'])
+        st.caption(f"{n} result{'s'[:n^1]} found.")
         with st.expander("Show attractions"):
             st.write([get_name(attraction) for attraction in searched['features']])
 
