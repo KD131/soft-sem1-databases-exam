@@ -1,5 +1,6 @@
 import folium
 import streamlit as st
+from folium.plugins import Draw
 from geojson import FeatureCollection
 from streamlit_folium import st_folium
 
@@ -17,7 +18,7 @@ st.write("This app shows you NYC subway stops and nearby attractions")
 # get data
 subway_stops = db.subway_stops.get_all()
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1, 2])
 with col1:
     # subway dropdown
     subway = st.selectbox("Select a subway stop", subway_stops['features'], format_func=lambda stop: stop['properties']['name'])
@@ -46,12 +47,13 @@ with col2:
     # selected stop layer
     # this goes first so that the other features are selectable on top of it
     if subway:
+        selected_subway_group = folium.FeatureGroup(name="Selected Stop").add_to(m)
         folium.GeoJson(FeatureCollection([subway]),
                        name="Selected Stop",
                        tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
                        popup=folium.GeoJsonPopup(fields=["name", "line", "notes"], aliases=["Stop Name", "Line", "Notes"]),
                        marker=folium.Circle(radius=1000, dash_array='10', color='orange', fill=True, fill_color='white', fill_opacity=0.4)
-                       ).add_to(m)
+                       ).add_to(selected_subway_group)
         if nearby_attractions['features']:
             nearby_style = {
                 'fill': True,
@@ -64,7 +66,7 @@ with col2:
                     name="Nearby Attractions",
                     tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
                     marker=folium.Circle(radius=30, **nearby_style)
-                    ).add_to(m)
+                    ).add_to(selected_subway_group)
     
     # searched attractions layer
     if name and searched['features']:
@@ -89,6 +91,15 @@ with col2:
                    marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
                    ).add_to(m)
     
-    folium.LayerControl(collapsed=True).add_to(m)
-    map_data = st_folium(m, width=800, height=800, returned_objects=[])
+    
+    Draw(draw_options={
+        'polyline': False,
+        'rectangle': False,
+        'polygon': False,
+        'circle': False,
+        'marker': { 'repeatMode': True },
+        'circlemarker': False
+        }).add_to(m)
+    folium.LayerControl(collapsed=True, hide_single_base=True).add_to(m)
+    map_data = st_folium(m, width=1000, height=800, returned_objects=[])
 
