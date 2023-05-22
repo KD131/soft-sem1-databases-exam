@@ -1,0 +1,46 @@
+# could not get it to work, but leaving it in just in case
+
+services:
+  mongo-config:
+    image: mongo
+    volumes:
+      - mongo-config:/data/db
+    command: mongod --configsvr --replSet rs_conf
+    networks:
+      - mongo-net
+
+  mongo-shard0:
+    image: mongo
+    volumes:
+      - mongo-shard1:/data/db
+    command: mongod --shardsvr --replSet rs0
+    networks:
+      - mongo-net
+
+  mongo-shard1:
+    image: mongo
+    volumes:
+      - mongo-shard2:/data/db
+    command: mongod --shardsvr --replSet rs1
+    networks:
+      - mongo-net
+
+  mongo-router:
+    image: mongo
+    command: mongos --configdb rs_conf/mongo-config:27019 --bind_ip_all
+    networks:
+      - mongo-net
+    depends_on:
+      - mongo-config
+      - mongo-shard1
+      - mongo-shard2
+
+volumes:
+  mongo-config:
+  mongo-shard1:
+  mongo-shard2:
+
+
+networks:
+  mongo-net:
+    driver: bridge
