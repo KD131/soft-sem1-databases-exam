@@ -44,6 +44,31 @@ with col2:
     lons, lats = zip(*coords)
     m = folium.Map()
     m.fit_bounds([[min(lats), min(lons)], [max(lats), max(lons)]])
+    
+    # selected stop layer
+    # this goes first so that the other features are selectable on top of it
+    if subway:
+        folium.GeoJson(FeatureCollection([subway]),
+                       name="Selected Stop",
+                       tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
+                       popup=folium.GeoJsonPopup(fields=["name", "line", "notes"], aliases=["Stop Name", "Line", "Notes"]),
+                       marker=folium.Circle(radius=1000, color='orange', fill=True, fill_color='white', fill_opacity=0.4)
+                       ).add_to(m)
+        if nearby_attractions['features']:
+            nearby_style = {
+                'fill': True,
+                'color': 'orange',
+                'fill_color': 'orange',
+                'fill_opacity': 0.8
+            }
+            folium.GeoJson(nearby_attractions,
+                    style_function=lambda x: nearby_style,
+                    name="Nearby Attractions",
+                    # tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
+                    marker=folium.Circle(radius=30, **nearby_style)
+                    ).add_to(m)
+    
+    # subway stops layer
     folium.GeoJson(subway_stops,
                    name="Subway Stops",
                    tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
@@ -51,20 +76,21 @@ with col2:
                    marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
                    ).add_to(m)
     
-    style = {
-        'fill': True,
-        'color': 'red',
-        'fill_color': 'red',
-        'fill_opacity': 0.8
-    }
-    
+    # searched attractions layer
     if name and searched['features']:
+        searched_style = {
+            'fill': True,
+            'color': 'green',
+            'fill_color': 'green',
+            'fill_opacity': 0.8
+        }
         folium.GeoJson(searched,
-                    style_function=lambda x: style,
+                    style_function=lambda x: searched_style,
                     name="Search Results",
                     tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
-                    marker=folium.Circle(radius=30, **style)
+                    marker=folium.Circle(radius=30, **searched_style)
                     ).add_to(m)
+    
     # folium.LayerControl(collapsed=False).add_to(m) # doesn't seem to show up
     map_data = st_folium(m, width=1200, height=800, returned_objects=[])
 
