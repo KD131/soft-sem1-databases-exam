@@ -50,7 +50,7 @@ with col2:
                        name="Selected Stop",
                        tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
                        popup=folium.GeoJsonPopup(fields=["name", "line", "notes"], aliases=["Stop Name", "Line", "Notes"]),
-                       marker=folium.Circle(radius=1000, color='orange', fill=True, fill_color='white', fill_opacity=0.4)
+                       marker=folium.Circle(radius=1000, dash_array='10', color='orange', fill=True, fill_color='white', fill_opacity=0.4)
                        ).add_to(m)
         if nearby_attractions['features']:
             nearby_style = {
