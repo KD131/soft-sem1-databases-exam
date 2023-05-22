@@ -103,7 +103,7 @@ with col2:
         'circlemarker': False
         }).add_to(m)
     folium.LayerControl(collapsed=True, hide_single_base=True).add_to(m)
-    map_data = st_folium(m, width=1000, height=700, returned_objects=['all_drawings'])
+    map_data = st_folium(m, width=1000, height=500, returned_objects=['all_drawings'])
     
     # start and end markers
     # first two markers but could just as well be the last two
@@ -113,8 +113,12 @@ with col2:
         st.header("Start")
         if len(markers) > 0:
             st.write(markers[0])
+        else:
+            st.caption("*Put a marker on the map.*")
             
     with col2:
         st.header("End")
         if len(markers) > 1:
             st.write(markers[1])
+        else:
+            st.caption("*Put a marker on the map.*")
