@@ -21,8 +21,7 @@ subway_stops = db.subway_stops.get_all()
 col1, col2 = st.columns([1, 2])
 with col1:
     # subway dropdown
-    subway = st.selectbox("Select a subway stop", subway_stops['features'], format_func=lambda stop: stop['properties']['name'])
-    # unfortunately it always selects something anyway.
+    subway = st.selectbox("Select a subway stop", [None]+subway_stops['features'], format_func=lambda stop: stop['properties']['name'] if stop else "Select a stop")
     if subway:
         nearby_attractions = db.attractions.get_near(subway['geometry']['coordinates'])
         n = len(nearby_attractions['features'])
