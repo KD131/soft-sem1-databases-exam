@@ -22,7 +22,7 @@ subway_lines = db.subway_lines.get_all()
 col1, col2 = st.columns([1, 2])
 with col1:
     # subway dropdown
-    subway = st.selectbox("Select a subway stop", [None]+subway_stops['features'], format_func=lambda stop: stop['properties']['name'] if stop else "Select a stop")
+    subway = st.selectbox("Select a subway stop", [None]+subway_stops['features'], format_func=lambda stop: stop['properties']['stop_name'] if stop else "Select a stop")
     if subway:
         nearby_attractions = db.attractions.get_near(subway['geometry']['coordinates'])
         n = len(nearby_attractions['features'])
@@ -52,8 +52,8 @@ with col2:
         selected_subway_group = folium.FeatureGroup(name="Selected Stop").add_to(m)
         folium.GeoJson(FeatureCollection([subway]),
                        name="Selected Stop",
-                       tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
-                       popup=folium.GeoJsonPopup(fields=["name", "line", "notes"], aliases=["Stop Name", "Line", "Notes"]),
+                       tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+                       popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
                        marker=folium.Circle(radius=1000, dash_array='10', color='orange', fill=True, fill_color='white', fill_opacity=0.4)
                        ).add_to(selected_subway_group)
         if nearby_attractions['features']:
@@ -95,8 +95,8 @@ with col2:
     # subway stops layer
     folium.GeoJson(subway_stops,
                    name="Subway Stops",
-                   tooltip=folium.GeoJsonTooltip(fields=["name", "line"], aliases=["Stop Name", "Line"]),
-                   popup=folium.GeoJsonPopup(fields=["name", "line", "notes"], aliases=["Stop Name", "Line", "Notes"]),
+                   tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+                   popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
                    marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
                    ).add_to(m)
     
@@ -120,7 +120,7 @@ with col2:
     
     def write_stop_distance(stop):
         if stop:
-            st.write(f"Closest subway stop: **{stop['properties']['name']}**  \n({round(stop['distance'])} meters away)")
+            st.write(f"Closest subway stop: **{stop['properties']['stop_name']}**  \n({round(stop['distance'])} meters away)")
         else:
             st.write("No nearby subway stops.")
     
