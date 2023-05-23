@@ -17,6 +17,7 @@ st.title("Welcome to the NYC Transit App")
 st.write("This app shows you NYC subway stops and nearby attractions")
 # get data
 subway_stops = db.subway_stops.get_all()
+subway_lines = db.subway_lines.get_all()
 
 col1, col2 = st.columns([1, 2])
 with col1:
@@ -83,6 +84,13 @@ with col2:
                     tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
                     marker=folium.Circle(radius=30, **searched_style)
                     ).add_to(m)
+        
+    # subway lines layer
+    folium.GeoJson(subway_lines,
+                   name="Subway Lines",
+                   tooltip=folium.GeoJsonTooltip(fields=["name"], aliases=["Line"]),
+                   popup=folium.GeoJsonPopup(fields=["name", "rt_symbol"], aliases=["Line", "RT Symbol"])
+                   ).add_to(m)
     
     # subway stops layer
     folium.GeoJson(subway_stops,
