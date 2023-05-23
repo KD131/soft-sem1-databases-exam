@@ -147,7 +147,7 @@ with col2:
             st.caption("*Put a marker on the map.*")
     
     # result map
-    if len(markers) > 1:
+    if len(markers) > 1 and start_stop and end_stop:
         # TODO: unpack coordinates before the LineStrings
         with st.expander("Show result"):
             coords = [marker['geometry']['coordinates'] for marker in markers]
