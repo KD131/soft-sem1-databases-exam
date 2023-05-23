@@ -22,6 +22,8 @@ Restore database from dump file.
 
 Our data came from publicly available datasets published by the city and state of New York.
 - [MTA General Transit Feed Specification (GTFS) Static Data](https://data.ny.gov/Transportation/MTA-General-Transit-Feed-Specification-GTFS-Static/fgm6-ccue)
+- [Subway Stations](https://data.cityofnewyork.us/Transportation/Subway-Stations/arq3-7z49)
+- [Subway Lines](https://data.cityofnewyork.us/Transportation/Subway-Lines/3qz8-muuu)
 - [Places](https://data.cityofnewyork.us/Health/Places/mzbd-kucq)
 - [New York City Museums](https://data.cityofnewyork.us/Recreation/New-York-City-Museums/ekax-ky3z)
 - [New York City Art Galleries](https://data.cityofnewyork.us/Recreation/New-York-City-Art-Galleries/tgyc-r5jh)
