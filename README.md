@@ -1,5 +1,17 @@
-## Setup
-### Packages
+## Table of contents
+- [1. Setup](#1-setup)
+  - [1.1. Packages](#11-packages)
+  - [1.2. Database](#12-database)
+- [2. Data](#2-data)
+  - [2.1. Sources](#21-sources)
+  - [2.2. Imports](#22-imports)
+    - [2.2.1. jq](#221-jq)
+    - [2.2.2. Aggregation](#222-aggregation)
+  - [2.3. Build indexes](#23-build-indexes)
+  - [2.4. Updates](#24-updates)
+
+## 1. Setup
+### 1.1. Packages
 For streamlit install these packages:
 ```shell
 pip install streamlit
@@ -15,11 +27,22 @@ pip install pymongo
 pip install geojson
 ```
 
-### Database
-Restore database from dump file.
+### 1.2. Database
+- Restore database from dump file.
+- Alternatively build it from scratch with [instructions](#2-data)
 
-## Data
+Once we do replication and/or sharding, these commands might change, but maybe not.
 
+The dump was created with `mongodump -d exam --archive=dump_archive.gzip --gzip`, so to restore it, run the following:
+
+```shell
+mongorestore --archive=dump_archive.gzip --gzip
+```
+
+This will create the `exam` database and rebuild indexes.
+
+## 2. Data
+### 2.1. Sources
 Our data came from publicly available datasets published by the city and state of New York.
 - [MTA General Transit Feed Specification (GTFS) Static Data](https://data.ny.gov/Transportation/MTA-General-Transit-Feed-Specification-GTFS-Static/fgm6-ccue)
 - [Subway Stations](https://data.cityofnewyork.us/Transportation/Subway-Stations/arq3-7z49)
@@ -32,6 +55,47 @@ Our data came from publicly available datasets published by the city and state o
 - [Scenic Landmarks](https://data.cityofnewyork.us/Housing-Development/Scenic-Landmarks/gi7d-8gt5)
 - [Historic Districts](https://data.cityofnewyork.us/Housing-Development/Historic-Districts/xbvj-gfnw)
 
+All the data in the MongoDB database is in GeoJSON format. This allows us to perform geospatial operations and to plot the documents on a map.
+
+### 2.2. Imports
+- [`jq`](https://stedolan.github.io/jq/) into [`mongoimport`](https://www.mongodb.com/docs/database-tools/mongoimport/)
+- Alternatively, you can import the files as is and use an aggregation pipeline.
+
+#### 2.2.1. jq
+The easiest way to import the GeoJSON data is to install a tool called [jq](https://stedolan.github.io/jq/). Because the data is formatted as a `FeatureCollection` and we want each `Feature` to be a separate document, we need to extract the `features` property which is an array.
+
+An example looks like this:
+
+```shell
+jq -c '.features' stops.geojson | mongoimport -d exam -c transit --jsonArray
+```
+
+#### 2.2.2. Aggregation
+Alternatively, you can import the files as is, meaning each document is the whole of `FeatureCollection` in the file, and then use the following aggregation pipeline on each collection:
+
+```javascript
+db.transit.aggregrate([
+  {
+    '$unwind': {
+      'path': '$features'
+    }
+  }, {
+    '$replaceWith': '$features'
+  }, {
+    '$out': 'transit'
+  }
+])
+```
+
+### 2.3. Build indexes
+We need to build geospatial indexes in order to perform geospatial operations on the collections.
+
+```javascript
+db.transit.createIndex({geometry: '2dsphere'})
+db.attractions.createIndex({geometry: '2dsphere'})
+```
+
+### 2.4. Updates
 Attractions have different name fields depending on what file they came from and what type of attraction they are. This caused issues with displaying them on the map. There were a couple options for fixing this:
 1. Renaming them in code.
 2. Renaming them in the database.
