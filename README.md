@@ -57,6 +57,8 @@ Our data came from publicly available datasets published by the city and state o
 
 All the data in the MongoDB database is in GeoJSON format. This allows us to perform geospatial operations and to plot the documents on a map.
 
+The following sections concern what we did to import and setup the data in the database. If you want to recreate the database, simply [restore it](#12-database). Only if you wish to recreate the database from scratch the way we did, should you follow the following instructions yourself.
+
 ### 2.2. Imports
 - [`jq`](https://stedolan.github.io/jq/) into [`mongoimport`](https://www.mongodb.com/docs/database-tools/mongoimport/)
 - Alternatively, you can import the files as is and use an aggregation pipeline.
