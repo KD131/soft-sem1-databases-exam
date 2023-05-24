@@ -34,7 +34,7 @@ pip install geojson
 
 Once we do replication and/or sharding, these commands might change, but maybe not.
 
-The dump was created with `mongodump -d exam --archive=dump_archive.gzip --gzip`, so to restore it, run the following:
+The dump was created with `mongodump -d exam --archive=data/dump_archive.gzip --gzip`, so to restore it, run the following:
 
 ```shell
 mongorestore --archive=dump_archive.gzip --gzip
