@@ -166,16 +166,23 @@ with col2:
                            marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
                            ).add_to(m)
             
+            # test route
             route = db.routes.get_route()
-            folium.GeoJson(route).add_to(m)
+            folium.GeoJson(route,
+                           name="Route",
+                           tooltip=folium.GeoJsonTooltip(fields=['departure', "arrival"], aliases=["Departure", "Arrival"]),
+                           popup=folium.GeoJsonPopup(fields=['departure', "arrival"], aliases=["Departure", "Arrival"]),
+                           ).add_to(m)
+            # route stops
+            # these could have been included in the route GeoJSON as Point Features, but then they would be styled the same as the route
             route_stop_ids = {line['properties']['start_parent'] for line in route['features']} | {line['properties']['end_parent'] for line in route['features']}
             route_stops = [stop for stop in subway_stops['features'] if stop['properties']['stop_id'] in route_stop_ids]
             folium.GeoJson(FeatureCollection(route_stops),
-                   name="Subway Stops",
-                   tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                   popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                   marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
-                   ).add_to(m)
+                           name="Subway Stops",
+                           tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+                           popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+                           marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
+                           ).add_to(m)
             
             # TODO: consider multi-line. I think if you want to style them differently, they must be different features,
             # TODO: but the line between the stops could be a multi-line.
