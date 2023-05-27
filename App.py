@@ -8,9 +8,13 @@ import db
 
 st.set_page_config(layout="wide")
 
-def get_name(feature):
-    properties = feature['properties']
+def get_attraction_name(attraction):
+    properties = attraction['properties']
     return properties.get('name')# or properties.get('scen_lm_na') or properties.get('area_name') or properties.get('lpc_name')
+
+def get_stop_extended_name(stop):
+    properties = stop['properties']
+    return f"{properties.get('stop_name')} ({properties.get('stop_id')})"
 
 
 st.title("Welcome to the NYC Transit App")
@@ -22,13 +26,13 @@ subway_lines = db.subway_lines.get_all()
 col1, col2 = st.columns([1, 2])
 with col1:
     # subway dropdown
-    subway = st.selectbox("Select a subway stop", [None]+subway_stops['features'], format_func=lambda stop: stop['properties']['stop_name'] if stop else "Select a stop")
+    subway = st.selectbox("Select a subway stop", [None]+subway_stops['features'], format_func=lambda stop: get_stop_extended_name(stop) if stop else "Select a stop")
     if subway:
         nearby_attractions = db.attractions.get_near(subway['geometry']['coordinates'])
         n = len(nearby_attractions['features'])
         st.caption(f"{n} attraction{'s'[:n^1]} found near this stop.")
         with st.expander("Show attractions"):
-            st.write([get_name(attraction) for attraction in nearby_attractions['features']])
+            st.write([get_attraction_name(attraction) for attraction in nearby_attractions['features']])
 
     # attaction search
     name = st.text_input("Search for an attraction")
@@ -37,7 +41,7 @@ with col1:
         n = len(searched['features'])
         st.caption(f"{n} result{'s'[:n^1]} found.")
         with st.expander("Show attractions"):
-            st.write([get_name(attraction) for attraction in searched['features']])
+            st.write([get_attraction_name(attraction) for attraction in searched['features']])
 
 with col2:
     # create map
@@ -120,7 +124,7 @@ with col2:
     
     def write_stop_distance(stop):
         if stop:
-            st.write(f"Closest subway stop: **{stop['properties']['stop_name']}**  \n({round(stop['distance'])} meters away)")
+            st.write(f"Closest subway stop: **{get_stop_extended_name(stop)}**  \n({round(stop['distance'])} meters away)")
         else:
             st.write("No nearby subway stops.")
     
