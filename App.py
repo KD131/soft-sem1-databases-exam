@@ -136,11 +136,13 @@ with col2:
             
             # test route
             route = db.routes.get_route()
-            folium.GeoJson(route,
-                           name="Route",
-                           tooltip=folium.GeoJsonTooltip(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
-                           popup=folium.GeoJsonPopup(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
-                           ).add_to(m)
+            folium.GeoJson(
+                route,
+                name="Route",
+                tooltip=folium.GeoJsonTooltip(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
+                popup=folium.GeoJsonPopup(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
+            ).add_to(m)
+            
             # route stops
             # these could have been included in the route GeoJSON as Point Features, but then they would be styled the same as the route
             route_stop_ids = {line['properties']['start_parent'] for line in route['features']} | {line['properties']['end_parent'] for line in route['features']}
@@ -149,16 +151,18 @@ with col2:
             
             # TODO: consider multi-line. I think if you want to style them differently, they must be different features,
             # TODO: but the line between the stops could be a multi-line.
-            folium.GeoJson(FeatureCollection([
-                Feature(geometry=LineString([start_stop['geometry']['coordinates'], end_stop['geometry']['coordinates']])),
-                Feature(geometry=LineString([start_stop['geometry']['coordinates'], markers[0]['geometry']['coordinates']])),
-                Feature(geometry=LineString([end_stop['geometry']['coordinates'], markers[1]['geometry']['coordinates']]))
-            ]),
-                           style_function=lambda x: {
-                               'color': '#0e1117',
-                               'dashArray': '10'
-                           }
-                           ).add_to(m)
+            folium.GeoJson(
+                FeatureCollection([
+                    Feature(geometry=LineString([start_stop['geometry']['coordinates'], end_stop['geometry']['coordinates']])),
+                    Feature(geometry=LineString([start_stop['geometry']['coordinates'], markers[0]['geometry']['coordinates']])),
+                    Feature(geometry=LineString([end_stop['geometry']['coordinates'], markers[1]['geometry']['coordinates']]))
+                ]),
+                style_function=lambda x: {
+                    'color': '#0e1117',
+                    'dashArray': '10'
+                }
+            ).add_to(m)
+            
             st_folium(m, width=1000, height=500, returned_objects=[])
 
 # TODO: refactor
