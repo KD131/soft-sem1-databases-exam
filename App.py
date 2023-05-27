@@ -71,7 +71,7 @@ with col2:
                     style_function=lambda x: nearby_style,
                     name="Nearby Attractions",
                     tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
-                    marker=folium.Circle(radius=30, **nearby_style)
+                    marker=folium.Circle(radius=26, **nearby_style)
                     ).add_to(selected_subway_group)
     
     # searched attractions layer
@@ -86,7 +86,7 @@ with col2:
                     style_function=lambda x: searched_style,
                     name="Search Results",
                     tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
-                    marker=folium.Circle(radius=30, **searched_style)
+                    marker=folium.Circle(radius=26, **searched_style)
                     ).add_to(m)
         
     # subway lines layer
@@ -101,7 +101,7 @@ with col2:
                    name="Subway Stops",
                    tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
                    popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                   marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
+                   marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
                    ).add_to(m)
     
     
@@ -159,10 +159,10 @@ with col2:
             m = folium.Map()
             m.fit_bounds([[min(lats), min(lons)], [max(lats), max(lons)]])
             folium.GeoJson(FeatureCollection(markers),
-                           marker=folium.Circle(radius=30, color='purple', fill=True, fill_color='purple', fill_opacity=0.9)
+                           marker=folium.Circle(radius=26, color='purple', fill=True, fill_color='purple', fill_opacity=0.9)
                            ).add_to(m)
             folium.GeoJson(FeatureCollection([start_stop, end_stop]),
-                           marker=folium.Circle(radius=20, fill=True, fill_opacity=0.8)
+                           marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
                            ).add_to(m)
             # TODO: consider multi-line. I think if you want to style them differently, they must be different features,
             # TODO: but the line between the stops could be a multi-line.
