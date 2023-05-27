@@ -16,6 +16,67 @@ def get_stop_extended_name(stop):
     properties = stop['properties']
     return f"{properties.get('stop_name')} ({properties.get('stop_id')})"
 
+def plot_radius_around_stop(stop):
+    return folium.GeoJson(
+        FeatureCollection([stop]),
+        name="Selected Stop",
+        tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+        popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+        marker=folium.Circle(radius=1000, dash_array='10', color='orange', fill=True, fill_color='white', fill_opacity=0.4)
+    )
+
+def plot_nearby_attractions(attractions):
+    nearby_style = {
+        'fill': True,
+        'color': 'orange',
+        'fill_color': 'orange',
+        'fill_opacity': 0.8
+    }
+    return folium.GeoJson(
+        attractions,
+        style_function=lambda x: nearby_style,
+        name="Nearby Attractions",
+        tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
+        marker=folium.Circle(radius=26, **nearby_style)
+    )
+
+def plot_searched_attractions(attractions):
+    searched_style = {
+        'fill': True,
+        'color': 'green',
+        'fill_color': 'green',
+        'fill_opacity': 0.8
+    }
+    return folium.GeoJson(
+        attractions,
+        style_function=lambda x: searched_style,
+        name="Search Results",
+        tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
+        marker=folium.Circle(radius=26, **searched_style)
+    )
+    
+def plot_subway_lines(subway_lines):
+    return folium.GeoJson(
+        subway_lines,
+        name="Subway Lines",
+        tooltip=folium.GeoJsonTooltip(fields=["name"], aliases=["Line"]),
+        popup=folium.GeoJsonPopup(fields=["name", "rt_symbol"], aliases=["Line", "RT Symbol"])
+    )
+
+def plot_subway_stops(subway_stops):
+    return folium.GeoJson(
+        subway_stops,
+        name="Subway Stops",
+        tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+        popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+        marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
+    )
+
+def plot_markers(markers):
+    return folium.GeoJson(
+        FeatureCollection(markers),
+        marker=folium.Circle(radius=26, color='purple', fill=True, fill_color='purple', fill_opacity=0.9)
+    )
 
 st.title("Welcome to the NYC Transit App")
 st.write("This app shows you NYC subway stops and nearby attractions")
@@ -54,57 +115,21 @@ with col2:
     # this goes first so that the other features are selectable on top of it
     if subway:
         selected_subway_group = folium.FeatureGroup(name="Selected Stop").add_to(m)
-        folium.GeoJson(FeatureCollection([subway]),
-                       name="Selected Stop",
-                       tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                       popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                       marker=folium.Circle(radius=1000, dash_array='10', color='orange', fill=True, fill_color='white', fill_opacity=0.4)
-                       ).add_to(selected_subway_group)
+        plot_radius_around_stop(subway).add_to(selected_subway_group)
         if nearby_attractions['features']:
-            nearby_style = {
-                'fill': True,
-                'color': 'orange',
-                'fill_color': 'orange',
-                'fill_opacity': 0.8
-            }
-            folium.GeoJson(nearby_attractions,
-                    style_function=lambda x: nearby_style,
-                    name="Nearby Attractions",
-                    tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
-                    marker=folium.Circle(radius=26, **nearby_style)
-                    ).add_to(selected_subway_group)
+            plot_nearby_attractions(nearby_attractions).add_to(selected_subway_group)
     
     # searched attractions layer
     if name and searched['features']:
-        searched_style = {
-            'fill': True,
-            'color': 'green',
-            'fill_color': 'green',
-            'fill_opacity': 0.8
-        }
-        folium.GeoJson(searched,
-                    style_function=lambda x: searched_style,
-                    name="Search Results",
-                    tooltip=folium.GeoJsonTooltip(fields=['name'], aliases=["Name"]),
-                    marker=folium.Circle(radius=26, **searched_style)
-                    ).add_to(m)
+        plot_searched_attractions(searched).add_to(m)
         
     # subway lines layer
-    folium.GeoJson(subway_lines,
-                   name="Subway Lines",
-                   tooltip=folium.GeoJsonTooltip(fields=["name"], aliases=["Line"]),
-                   popup=folium.GeoJsonPopup(fields=["name", "rt_symbol"], aliases=["Line", "RT Symbol"])
-                   ).add_to(m)
+    plot_subway_lines(subway_lines).add_to(m)
     
     # subway stops layer
-    folium.GeoJson(subway_stops,
-                   name="Subway Stops",
-                   tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                   popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                   marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
-                   ).add_to(m)
+    plot_subway_stops(subway_stops).add_to(m)
     
-    
+    # draw controls
     Draw(draw_options={
         'polyline': False,
         'rectangle': False,
@@ -112,9 +137,15 @@ with col2:
         'circle': False,
         'marker': { 'repeatMode': True },
         'circlemarker': False
-        }).add_to(m)
+    }).add_to(m)
+    
+    # layer controls
     folium.LayerControl(collapsed=True, hide_single_base=True).add_to(m)
+    
+    # mouse position
     MousePosition().add_to(m)
+    
+    # plot map
     map_data = st_folium(m, width=1000, height=500, returned_objects=['all_drawings'])
     
     def closest_stop(coords):
@@ -159,30 +190,21 @@ with col2:
             m = folium.Map()
             m.fit_bounds([[min(lats), min(lons)], [max(lats), max(lons)]])
             
-            folium.GeoJson(FeatureCollection(markers),
-                           marker=folium.Circle(radius=26, color='purple', fill=True, fill_color='purple', fill_opacity=0.9)
-                           ).add_to(m)
-            folium.GeoJson(FeatureCollection([start_stop, end_stop]),
-                           marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
-                           ).add_to(m)
+            plot_markers(markers).add_to(m)
+            plot_subway_stops(FeatureCollection([start_stop, end_stop])).add_to(m)
             
             # test route
             route = db.routes.get_route()
             folium.GeoJson(route,
                            name="Route",
-                           tooltip=folium.GeoJsonTooltip(fields=['departure', "arrival"], aliases=["Departure", "Arrival"]),
-                           popup=folium.GeoJsonPopup(fields=['departure', "arrival"], aliases=["Departure", "Arrival"]),
+                           tooltip=folium.GeoJsonTooltip(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
+                           popup=folium.GeoJsonPopup(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
                            ).add_to(m)
             # route stops
             # these could have been included in the route GeoJSON as Point Features, but then they would be styled the same as the route
             route_stop_ids = {line['properties']['start_parent'] for line in route['features']} | {line['properties']['end_parent'] for line in route['features']}
             route_stops = [stop for stop in subway_stops['features'] if stop['properties']['stop_id'] in route_stop_ids]
-            folium.GeoJson(FeatureCollection(route_stops),
-                           name="Subway Stops",
-                           tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                           popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
-                           marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
-                           ).add_to(m)
+            plot_subway_stops(FeatureCollection(route_stops)).add_to(m)
             
             # TODO: consider multi-line. I think if you want to style them differently, they must be different features,
             # TODO: but the line between the stops could be a multi-line.
