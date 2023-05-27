@@ -1,46 +1,45 @@
-# could not get it to work, but leaving it in just in case
+version: '2'
 
 services:
-  mongo-config:
-    image: mongo
-    volumes:
-      - mongo-config:/data/db
-    command: mongod --configsvr --replSet rs_conf
-    networks:
-      - mongo-net
+  mongodb-sharded:
+    image: docker.io/bitnami/mongodb-sharded:6.0
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-sharded
+      - MONGODB_SHARDING_MODE=mongos
+      - MONGODB_CFG_PRIMARY_HOST=mongodb-cfg
+      - MONGODB_CFG_REPLICA_SET_NAME=cfgreplicaset
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_ROOT_PASSWORD=password123
+    ports:
+      - "27017:27017"
 
-  mongo-shard0:
-    image: mongo
+  mongodb-shard0:
+    image: docker.io/bitnami/mongodb-sharded:6.0
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-shard0
+      - MONGODB_SHARDING_MODE=shardsvr
+      - MONGODB_MONGOS_HOST=mongodb-sharded
+      - MONGODB_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=shard0
     volumes:
-      - mongo-shard1:/data/db
-    command: mongod --shardsvr --replSet rs0
-    networks:
-      - mongo-net
+      - 'shard0_data:/bitnami'
 
-  mongo-shard1:
-    image: mongo
+  mongodb-cfg:
+    image: docker.io/bitnami/mongodb-sharded:6.0
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-cfg
+      - MONGODB_SHARDING_MODE=configsvr
+      - MONGODB_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=cfgreplicaset
     volumes:
-      - mongo-shard2:/data/db
-    command: mongod --shardsvr --replSet rs1
-    networks:
-      - mongo-net
-
-  mongo-router:
-    image: mongo
-    command: mongos --configdb rs_conf/mongo-config:27019 --bind_ip_all
-    networks:
-      - mongo-net
-    depends_on:
-      - mongo-config
-      - mongo-shard1
-      - mongo-shard2
+      - 'cfg_data:/bitnami'
 
 volumes:
-  mongo-config:
-  mongo-shard1:
-  mongo-shard2:
-
-
-networks:
-  mongo-net:
-    driver: bridge
+  shard0_data:
+    driver: local
+  cfg_data:
+    driver: local
