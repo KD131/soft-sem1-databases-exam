@@ -6,7 +6,7 @@ from db.connection import db
 
 @st.cache_data
 def get_all():
-    stops = db.transit.find({}, { "_id": 0 } )
+    stops = db.transit.find({'properties.location_type': "1"}, { "_id": 0 } )
     return FeatureCollection(list(stops))
 
 @st.cache_data
