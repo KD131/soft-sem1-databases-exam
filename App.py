@@ -158,12 +158,25 @@ with col2:
             lons, lats = zip(*coords)
             m = folium.Map()
             m.fit_bounds([[min(lats), min(lons)], [max(lats), max(lons)]])
+            
             folium.GeoJson(FeatureCollection(markers),
                            marker=folium.Circle(radius=26, color='purple', fill=True, fill_color='purple', fill_opacity=0.9)
                            ).add_to(m)
             folium.GeoJson(FeatureCollection([start_stop, end_stop]),
                            marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
                            ).add_to(m)
+            
+            route = db.routes.get_route()
+            folium.GeoJson(route).add_to(m)
+            route_stop_ids = {line['properties']['start_parent'] for line in route['features']} | {line['properties']['end_parent'] for line in route['features']}
+            route_stops = [stop for stop in subway_stops['features'] if stop['properties']['stop_id'] in route_stop_ids]
+            folium.GeoJson(FeatureCollection(route_stops),
+                   name="Subway Stops",
+                   tooltip=folium.GeoJsonTooltip(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+                   popup=folium.GeoJsonPopup(fields=["stop_id", "stop_name"], aliases=["ID", "Name"]),
+                   marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
+                   ).add_to(m)
+            
             # TODO: consider multi-line. I think if you want to style them differently, they must be different features,
             # TODO: but the line between the stops could be a multi-line.
             folium.GeoJson(FeatureCollection([
