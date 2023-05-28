@@ -2,5 +2,6 @@ altair==4.2.2
 folium==0.14.0
 geojson==3.0.1
 pymongo==4.3.3
+requests==2.31.0
 streamlit==1.22.0
 streamlit_folium==0.11.1

@@ -126,11 +126,12 @@ with col2:
     if len(markers) > 1 and start_stop and end_stop:
         with st.expander("Show result"):
             # test route
-            route = db.routes.get_route()
-            m = plot_geojson.result_map(markers, route, subway_stops, start_stop, end_stop)
+            route = db.routes.get_route(start=start_stop['properties']['stop_id'], end=end_stop['properties']['stop_id'])
+            if route:
+                m = plot_geojson.result_map(markers, route, subway_stops, start_stop, end_stop)
             
             # backup map if no route could be found
-            if not route:
+            else:
                 st.warning("No route could be found.")
                 m = plot_geojson.backup_map(markers, start_stop, end_stop)
             

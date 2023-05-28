@@ -1,10 +1,10 @@
-import json
-
+import requests
 import streamlit as st
 
 
-# test data
 @st.cache_data
-def get_route():
-    with open("data/test.geojson") as f:
-        return json.load(f)
+def get_route(start, end):
+    url = 'http://localhost:8000/search'
+    r = requests.get(url, params={'start': start, 'stop': end})
+    r.raise_for_status()
+    return r.json()
