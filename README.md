@@ -1,19 +1,18 @@
-# MongoDB
+# MongoDB and Streamlit
 
 ## Table of contents
 
-- [MongoDB](#mongodb)
-  - [1. Setup](#1-setup)
-    - [1.1. Packages](#11-packages)
-    - [1.2. Database](#12-database)
-  - [2. Usage](#2-usage)
-  - [3. Data](#3-data)
-    - [3.1. Sources](#31-sources)
-    - [3.2. Imports](#32-imports)
-      - [3.2.1. jq](#321-jq)
-      - [3.2.2. Aggregation](#322-aggregation)
-    - [3.3. Build indexes](#33-build-indexes)
-    - [3.4. Updates](#34-updates)
+- [1. Setup](#1-setup)
+  - [1.1. Packages](#11-packages)
+  - [1.2. Database](#12-database)
+- [2. Usage](#2-usage)
+- [3. Data](#3-data)
+  - [3.1. Sources](#31-sources)
+  - [3.2. Imports](#32-imports)
+    - [3.2.1. jq](#321-jq)
+    - [3.2.2. Aggregation](#322-aggregation)
+  - [3.3. Build indexes](#33-build-indexes)
+  - [3.4. Updates](#34-updates)
 
 ## 1. Setup
 
