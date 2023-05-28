@@ -1,7 +1,8 @@
 import folium
-from geojson import FeatureCollection
+from geojson import FeatureCollection, Feature, LineString
 
 
+# TODO: rename functions to avoid name conflicts
 def radius_around_stop(stop):
     return folium.GeoJson(
         FeatureCollection([stop]),
@@ -58,8 +59,71 @@ def subway_stops(subway_stops):
         marker=folium.Circle(radius=18, fill=True, fill_opacity=0.8)
     )
 
-def markers(markers):
+def markers(_markers):
     return folium.GeoJson(
-        FeatureCollection(markers),
+        FeatureCollection(_markers),
         marker=folium.Circle(radius=26, color='purple', fill=True, fill_color='purple', fill_opacity=0.9)
     )
+    
+def route(_route):
+    return folium.GeoJson(
+        _route,
+        name="Route",
+        tooltip=folium.GeoJsonTooltip(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
+        popup=folium.GeoJsonPopup(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival'])
+    )
+
+def walk_to_markers(_markers, start_stop, end_stop):
+    return folium.GeoJson(
+        FeatureCollection([
+            Feature(geometry=LineString([start_stop['geometry']['coordinates'], _markers[0]['geometry']['coordinates']])),
+            Feature(geometry=LineString([end_stop['geometry']['coordinates'], _markers[1]['geometry']['coordinates']]))
+        ]),
+        style_function=lambda x: {
+            'color': '#0e1117',
+            'dashArray': '10'
+        }
+    )
+
+def sw_ne_corners(coords):
+    lons, lats = zip(*coords)
+    return (min(lats), min(lons)), (max(lats), max(lons))
+
+def result_map(_markers, _route, all_stops, start_stop, end_stop):
+    m = folium.Map()
+    
+    markers(_markers).add_to(m)
+    route(_route).add_to(m)
+    
+    # route stops
+    # these could have been included in the route GeoJSON as Point Features, but then they would be styled the same as the route
+    route_stop_ids = {line['properties']['start_parent'] for line in _route['features']} | {line['properties']['end_parent'] for line in _route['features']}
+    route_stops = [stop for stop in all_stops['features'] if stop['properties']['stop_id'] in route_stop_ids]
+    subway_stops(FeatureCollection(route_stops)).add_to(m)
+    # if the direction of the route could be trusted, we wouldn't need explicit start and end stops
+    walk_to_markers(_markers, start_stop, end_stop).add_to(m)
+    
+    coords = [marker['geometry']['coordinates'] for marker in _markers]
+    m.fit_bounds(sw_ne_corners(coords))
+    
+    return m
+
+def backup_map(_markers, start_stop, end_stop):
+    m = folium.Map()
+    
+    markers(_markers).add_to(m)
+    subway_stops(FeatureCollection([start_stop, end_stop])).add_to(m)
+    route(
+        FeatureCollection([
+            Feature(
+                geometry=LineString([start_stop['geometry']['coordinates'], end_stop['geometry']['coordinates']]),
+                properties={'departure': '', 'arrival': ''}
+            )
+        ])
+    ).add_to(m)
+    walk_to_markers(_markers, start_stop, end_stop).add_to(m)
+    
+    coords = [marker['geometry']['coordinates'] for marker in _markers]
+    m.fit_bounds(sw_ne_corners(coords))
+    
+    return m

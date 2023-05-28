@@ -124,44 +124,14 @@ with col2:
     
     # result map
     if len(markers) > 1 and start_stop and end_stop:
-        # TODO: unpack coordinates before the LineStrings
         with st.expander("Show result"):
-            coords = [marker['geometry']['coordinates'] for marker in markers]
-            lons, lats = zip(*coords)
-            m = folium.Map()
-            m.fit_bounds([[min(lats), min(lons)], [max(lats), max(lons)]])
-            
-            plot_geojson.markers(markers).add_to(m)
-            plot_geojson.subway_stops(FeatureCollection([start_stop, end_stop])).add_to(m)
-            
             # test route
             route = db.routes.get_route()
-            folium.GeoJson(
-                route,
-                name="Route",
-                tooltip=folium.GeoJsonTooltip(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
-                popup=folium.GeoJsonPopup(fields=['departure', 'arrival'], aliases=['Departure', 'Arrival']),
-            ).add_to(m)
+            m = plot_geojson.result_map(markers, route, subway_stops, start_stop, end_stop)
             
-            # route stops
-            # these could have been included in the route GeoJSON as Point Features, but then they would be styled the same as the route
-            route_stop_ids = {line['properties']['start_parent'] for line in route['features']} | {line['properties']['end_parent'] for line in route['features']}
-            route_stops = [stop for stop in subway_stops['features'] if stop['properties']['stop_id'] in route_stop_ids]
-            plot_geojson.subway_stops(FeatureCollection(route_stops)).add_to(m)
-            
-            # TODO: consider multi-line. I think if you want to style them differently, they must be different features,
-            # TODO: but the line between the stops could be a multi-line.
-            folium.GeoJson(
-                FeatureCollection([
-                    Feature(geometry=LineString([start_stop['geometry']['coordinates'], end_stop['geometry']['coordinates']])),
-                    Feature(geometry=LineString([start_stop['geometry']['coordinates'], markers[0]['geometry']['coordinates']])),
-                    Feature(geometry=LineString([end_stop['geometry']['coordinates'], markers[1]['geometry']['coordinates']]))
-                ]),
-                style_function=lambda x: {
-                    'color': '#0e1117',
-                    'dashArray': '10'
-                }
-            ).add_to(m)
+            # backup map if no route could be found
+            if not route:
+                m = plot_geojson.backup_map(markers, start_stop, end_stop)
             
             st_folium(m, width=1000, height=500, returned_objects=[])
 
