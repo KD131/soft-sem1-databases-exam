@@ -1,7 +1,6 @@
 import folium
 import streamlit as st
 from folium.plugins import Draw, MousePosition
-from geojson import Feature, FeatureCollection, LineString
 from streamlit_folium import st_folium
 
 import api
