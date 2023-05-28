@@ -4,7 +4,7 @@ from folium.plugins import Draw, MousePosition
 from geojson import Feature, FeatureCollection, LineString
 from streamlit_folium import st_folium
 
-import db
+import api
 import plot_geojson
 
 st.set_page_config(layout="wide")
@@ -22,15 +22,15 @@ def get_stop_extended_name(stop):
 st.title("Welcome to the NYC Transit App")
 st.write("This app shows you NYC subway stops and nearby attractions")
 # get data
-subway_stops = db.subway_stops.get_all()
-subway_lines = db.subway_lines.get_all()
+subway_stops = api.subway_stops.get_all()
+subway_lines = api.subway_lines.get_all()
 
 col1, col2 = st.columns([1, 2])
 with col1:
     # subway dropdown
     subway = st.selectbox("Select a subway stop", [None]+subway_stops['features'], format_func=lambda stop: get_stop_extended_name(stop) if stop else "Select a stop")
     if subway:
-        nearby_attractions = db.attractions.get_near(subway['geometry']['coordinates'])
+        nearby_attractions = api.attractions.get_near(subway['geometry']['coordinates'])
         n = len(nearby_attractions['features'])
         st.caption(f"{n} attraction{'s'[:n^1]} found near this stop.")
         with st.expander("Show attractions"):
@@ -39,7 +39,7 @@ with col1:
     # attaction search
     name = st.text_input("Search for an attraction")
     if name:
-        searched = db.attractions.get_like(name)
+        searched = api.attractions.get_like(name)
         n = len(searched['features'])
         st.caption(f"{n} result{'s'[:n^1]} found.")
         with st.expander("Show attractions"):
@@ -90,7 +90,7 @@ with col2:
     map_data = st_folium(m, width=1000, height=500, returned_objects=['all_drawings'])
     
     def closest_stop(coords):
-        near = db.subway_stops.get_near(coords)
+        near = api.subway_stops.get_near(coords)
         if near['features']:
             return near['features'][0] 
     
@@ -126,7 +126,7 @@ with col2:
     if len(markers) > 1 and start_stop and end_stop:
         with st.expander("Show result"):
             # test route
-            route = db.routes.get_route(start=start_stop['properties']['stop_id'], end=end_stop['properties']['stop_id'])
+            route = api.routes.get_route(start=start_stop['properties']['stop_id'], end=end_stop['properties']['stop_id'])
             if route:
                 m = plot_geojson.result_map(markers, route, subway_stops, start_stop, end_stop)
             
