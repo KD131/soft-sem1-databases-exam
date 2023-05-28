@@ -104,6 +104,7 @@ def result_map(_markers, _route, all_stops, start_stop, end_stop):
     walk_to_markers(_markers, start_stop, end_stop).add_to(m)
     
     coords = [marker['geometry']['coordinates'] for marker in _markers]
+    coords += [stop['geometry']['coordinates'] for stop in route_stops]
     m.fit_bounds(sw_ne_corners(coords))
     
     return m
@@ -124,6 +125,7 @@ def backup_map(_markers, start_stop, end_stop):
     walk_to_markers(_markers, start_stop, end_stop).add_to(m)
     
     coords = [marker['geometry']['coordinates'] for marker in _markers]
+    coords += [start_stop['geometry']['coordinates'], end_stop['geometry']['coordinates']]
     m.fit_bounds(sw_ne_corners(coords))
     
     return m

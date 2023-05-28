@@ -130,7 +130,7 @@ with col2:
             m = plot_geojson.result_map(markers, route, subway_stops, start_stop, end_stop)
             
             # backup map if no route could be found
-            if route:
+            if not route:
                 st.warning("No route could be found.")
                 m = plot_geojson.backup_map(markers, start_stop, end_stop)
             
