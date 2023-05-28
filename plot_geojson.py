@@ -1,5 +1,5 @@
 import folium
-from geojson import FeatureCollection, Feature, LineString
+from geojson import Feature, FeatureCollection, LineString
 
 
 # TODO: rename functions to avoid name conflicts
